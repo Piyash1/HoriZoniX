@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { assets, dummyUserData } from '../assets/assets'
 import { Link, useNavigate } from 'react-router-dom'
 import MenuItems from './MenuItems'
@@ -114,15 +115,14 @@ const Sidebar = ({sidebarOpen, setSidebarOpen}) => {
           <LogOut onClick={() => setShowLogoutConfirm(true)} className='w-4.5 text-gray-400 hover:text-gray-700 transition cursor-pointer' />
         </div>
 
-        {/* Logout Confirmation Modal */}
-        {showLogoutConfirm && (
+        {/* Logout Confirmation Modal via Portal to root (so it overlays the whole page) */}
+        {showLogoutConfirm && createPortal(
           <div 
             className='fixed inset-0 flex items-center justify-center z-50'
             onClick={handleModalClick}
           >
-            {/* Background Blur Overlay */}
             <div className='absolute inset-0 bg-black/20 backdrop-blur-sm'></div>
-            <div className='relative bg-white/95 backdrop-blur-md rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl border border-white/20 animate-in fade-in-0 zoom-in-95 duration-200'>
+            <div className='relative bg-white/95 backdrop-blur-md rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl border border-white/20'>
               <div className='flex items-center justify-between mb-6'>
                 <div className='flex items-center gap-3'>
                   <div className='w-10 h-10 bg-gradient-to-br from-red-500 to-pink-600 rounded-full flex items-center justify-center'>
@@ -137,7 +137,6 @@ const Sidebar = ({sidebarOpen, setSidebarOpen}) => {
                   <X className='w-5 h-5' />
                 </button>
               </div>
-              
               <div className='mb-8'>
                 <p className='text-gray-700 text-base leading-relaxed'>
                   Are you sure you want to logout? You'll need to sign in again to access your account.
@@ -151,7 +150,6 @@ const Sidebar = ({sidebarOpen, setSidebarOpen}) => {
                   </p>
                 </div>
               </div>
-              
               <div className='flex gap-3'>
                 <button
                   onClick={() => setShowLogoutConfirm(false)}
@@ -167,7 +165,8 @@ const Sidebar = ({sidebarOpen, setSidebarOpen}) => {
                 </button>
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
     </div>
   )

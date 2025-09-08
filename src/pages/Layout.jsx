@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import Sidebar from '../components/Sidebar'
+import MobileNav from '../components/MobileNav'
 import { Outlet } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import { dummyUserData } from '../assets/assets'
@@ -15,9 +16,10 @@ const Layout = () => {
 
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
-      <div className='ml-0 sm:ml-60 xl:ml-72 bg-slate-50 h-full overflow-y-auto'>
+      <div className='ml-0 sm:ml-60 xl:ml-72 bg-slate-50 h-full overflow-y-auto pb-14 sm:pb-0'>
         <Outlet />
       </div>
+      <MobileNav />
       {sidebarOpen && (
         <div className='fixed inset-0 bg-black/30 backdrop-blur-[1px] z-10 sm:hidden' onClick={()=> setSidebarOpen(false)} />
       )}

@@ -2,6 +2,7 @@ import { BadgeCheck, Heart, MessageCircle, Share2 } from 'lucide-react'
 import React, { useState } from 'react'
 import moment from 'moment'
 import { dummyUserData } from '../assets/assets'
+import { getMe } from '../lib/api'
 import { useNavigate, Link } from 'react-router-dom'
 import { toggleLike, sharePost, listComments, createComment } from '../lib/api'
 
@@ -19,7 +20,13 @@ const PostCard = ({post}) => {
     const [submittingComment, setSubmittingComment] = useState(false)
     const [liking, setLiking] = useState(false)
     const [sharing, setSharing] = useState(false)
-    const currentUser = dummyUserData
+    const [currentUser, setCurrentUser] = useState(null)
+
+    React.useEffect(() => {
+      getMe().then((res) => {
+        if (res?.user) setCurrentUser(res.user)
+      }).catch(() => {})
+    }, [])
 
     const handleLike = async ()=> {
       if (liking) return
@@ -72,6 +79,11 @@ const PostCard = ({post}) => {
       setSubmittingComment(true)
       try {
         const newComment = await createComment(post._id, text)
+        // Fallback: if backend did not include profile_picture for the current user yet,
+        // inject it from currentUser to keep UI consistent immediately after posting.
+        if (newComment?.user && !newComment.user.profile_picture && currentUser?.profile_picture) {
+          newComment.user.profile_picture = currentUser.profile_picture
+        }
         setComments(prev => [...prev, newComment])
         setCommentsCount(prev => prev + 1)
         setCommentText('')

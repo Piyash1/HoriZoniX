@@ -87,7 +87,7 @@ api.interceptors.response.use(
     console.log('API Response:', response.config.method?.toUpperCase(), response.config.url, response.status);
     return response.data;
   },
-  (error) => {
+  async (error) => {
     console.error('API Error:', {
       method: error.config?.method?.toUpperCase(),
       url: error.config?.url,
@@ -96,30 +96,37 @@ api.interceptors.response.use(
       data: error.response?.data,
       message: error.message
     });
-    
-    // Handle different types of error responses
+
+    // Retry once on CSRF failures (403), fetching a fresh token
+    const is403 = error.response?.status === 403;
+    const detail = error.response?.data?.detail || '';
+    const looksLikeCsrf = /csrf/i.test(detail || '') || /forbidden/i.test(error.response?.statusText || '');
+    const originalConfig = error.config || {};
+    if (is403 && looksLikeCsrf && !originalConfig._csrfRetried) {
+      try {
+        const fresh = await ensureCsrfToken();
+        originalConfig.headers = originalConfig.headers || {};
+        if (fresh) originalConfig.headers['X-CSRFToken'] = fresh;
+        originalConfig._csrfRetried = true;
+        return api.request(originalConfig);
+      } catch (_) {
+        // fall through to normal error handling
+      }
+    }
+
+    // Build message
     let message = 'Request failed';
-    
     if (error.response?.data) {
-      // If it's an HTML error page (500 error)
       if (typeof error.response.data === 'string' && error.response.data.includes('<!doctype html>')) {
         message = `Server Error (${error.response.status}): ${error.response.statusText}`;
-      }
-      // If it's a JSON error response
-      else if (typeof error.response.data === 'object') {
-        message = error.response.data.error || 
-                 error.response.data.detail || 
-                 error.response.data.message ||
-                 `Server Error (${error.response.status})`;
-      }
-      // If it's a string error response
-      else if (typeof error.response.data === 'string') {
+      } else if (typeof error.response.data === 'object') {
+        message = error.response.data.error || error.response.data.detail || error.response.data.message || `Server Error (${error.response.status})`;
+      } else if (typeof error.response.data === 'string') {
         message = error.response.data;
       }
     } else if (error.message) {
       message = error.message;
     }
-    
     throw new Error(message);
   }
 );

@@ -30,6 +30,19 @@ function getCookie(name) {
   return match ? decodeURIComponent(match[2]) : null;
 }
 
+// Cache CSRF token received from backend JSON (works cross-domain)
+let cachedCsrfToken = null;
+async function ensureCsrfToken() {
+  if (cachedCsrfToken) return cachedCsrfToken;
+  try {
+    const resp = await axios.get(`${API_BASE}/api/auth/csrf/`, { withCredentials: true });
+    cachedCsrfToken = resp?.data?.csrftoken || getCookie('csrftoken') || null;
+  } catch (_) {
+    cachedCsrfToken = getCookie('csrftoken') || null;
+  }
+  return cachedCsrfToken;
+}
+
 // Request interceptor to handle CSRF tokens and FormData
 api.interceptors.request.use(async (config) => {
   // Handle FormData - don't set Content-Type for FormData
@@ -41,13 +54,11 @@ api.interceptors.request.use(async (config) => {
   const method = config.method?.toUpperCase();
   if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
     try {
-      // Check if we already have a CSRF token
-      let csrftoken = getCookie('csrftoken');
-      
+      // Prefer JSON token from backend, fallback to cookie
+      let csrftoken = cachedCsrfToken || null;
       if (!csrftoken) {
         console.log('Getting CSRF token for', method, 'request to', config.url);
-        await axios.get(`${API_BASE}/api/auth/csrf/`, { withCredentials: true });
-        csrftoken = getCookie('csrftoken');
+        csrftoken = await ensureCsrfToken();
       }
       
       if (csrftoken) {

@@ -89,7 +89,8 @@ const Sidebar = ({sidebarOpen, setSidebarOpen}) => {
     }, [showLogoutConfirm])
 
   return (
-    <div className={`w-60 xl:w-72 bg-white border-r border-gray-200 flex flex-col justify-between items-center h-screen fixed left-0 top-0 z-20 max-sm:${sidebarOpen ? 'translate-x-0' : 'translate-x-full'} transition-all duration-300 ease-in-out`}>
+    <div className={`w-60 xl:w-72 bg-white border-r border-gray-200 flex flex-col justify-between items-center h-screen fixed left-0 top-0 z-30 transform transition-transform duration-300 ease-in-out
+      ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} sm:translate-x-0`}>
         <div className='w-full'>
             <img onClick={()=> navigate('/')} src={assets.logo} alt="" className='w-40 ml-7 my-2 cursor-pointer' />
             <hr className='border-gray-300 mb-8' />

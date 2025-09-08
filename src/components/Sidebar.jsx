@@ -28,73 +28,43 @@ const Sidebar = ({sidebarOpen, setSidebarOpen}) => {
     const handleLogout = async () => {
       try {
         console.log('Logging out...')
-        
-        // Get the API base URL
+
+        // API base
         const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000'
-        console.log('Using API_BASE:', API_BASE)
-        
-        // Get a fresh CSRF token first using direct axios call
-        console.log('Getting fresh CSRF token for logout...')
+
+        // Fetch CSRF token (JSON) and fallback to cookie if present
+        let csrftoken = null
         try {
-          const csrfResponse = await axios.get(`${API_BASE}/api/auth/csrf/`, { 
-            withCredentials: true,
-            headers: {
-              'Content-Type': 'application/json',
-            }
-          })
-          console.log('CSRF token obtained successfully:', csrfResponse.data)
-          console.log('CSRF response headers:', csrfResponse.headers)
-        } catch (csrfError) {
-          console.error('Failed to get CSRF token:', csrfError)
-          console.error('CSRF error response:', csrfError.response?.data)
-          // Continue anyway - maybe we have an old token
+          const resp = await axios.get(`${API_BASE}/api/auth/csrf/`, { withCredentials: true })
+          csrftoken = resp?.data?.csrftoken || null
+          console.log('Obtained CSRF token for logout (JSON):', csrftoken)
+        } catch (_) {
+          // ignore
         }
-        
-        // Get the CSRF token from cookies
-        function getCookie(name) {
-          const match = document.cookie.match(new RegExp('(^|; )' + name + '=([^;]*)'));
-          return match ? decodeURIComponent(match[2]) : null;
-        }
-        
-        const csrftoken = getCookie('csrftoken');
-        console.log('All cookies:', document.cookie);
-        console.log('CSRF token from cookie:', csrftoken);
-        
         if (!csrftoken) {
-          console.error('No CSRF token found in cookies!');
-          throw new Error('CSRF token not found');
+          const match = document.cookie.match(new RegExp('(^|; )' + 'csrftoken' + '=([^;]*)'))
+          csrftoken = match ? decodeURIComponent(match[2]) : null
+          console.log('Fallback CSRF token from cookie:', csrftoken)
         }
-        
-        // Make logout request with direct axios call
-        console.log('Making logout request with CSRF token:', csrftoken);
+
+        // Call logout; CSRF header optional (view is CSRF-exempt), include if available
+        const headers = { 'Content-Type': 'application/json' }
+        if (csrftoken) headers['X-CSRFToken'] = csrftoken
+
         const logoutResponse = await axios.post(`${API_BASE}/api/auth/logout/`, {}, {
           withCredentials: true,
-          headers: {
-            'X-CSRFToken': csrftoken,
-            'Content-Type': 'application/json',
-          }
-        });
-        
-        console.log('Logout API call successful:', logoutResponse.data);
-        
-        // Check if we're actually logged out
+          headers
+        })
+        console.log('Logout API call successful:', logoutResponse.data)
+
         const isStillAuthenticated = await checkAuth()
         console.log('Auth state after logout:', isStillAuthenticated)
-        
-        if (!isStillAuthenticated) {
-          console.log('Successfully logged out, redirecting to login...')
-          navigate('/', { replace: true })
-        } else {
-          console.warn('Logout failed - still authenticated')
-          // Force logout by clearing local state and redirecting
-          navigate('/', { replace: true })
-        }
+        navigate('/', { replace: true })
       } catch (error) {
         console.error('Logout error:', error)
         console.error('Error response data:', error.response?.data)
         console.error('Error response status:', error.response?.status)
         console.error('Error response headers:', error.response?.headers)
-        // Even if logout API fails, try to redirect
         navigate('/', { replace: true })
       }
     }

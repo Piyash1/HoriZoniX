@@ -1,7 +1,7 @@
 import { assets } from '../assets/assets'
 import { Star } from 'lucide-react'
 import { useState } from 'react'
-import { login, getMe } from '../lib/api'
+import { login, getMe, refreshCsrfToken } from '../lib/api'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../App'
 
@@ -21,7 +21,9 @@ const Login = () => {
       const loginResponse = await login({ email, password })
       if (loginResponse?.user) {
         // Login successful and user data received
-        console.log('Login successful, checking auth state...')
+        console.log('Login successful, refreshing CSRF token...')
+        await refreshCsrfToken()
+        console.log('CSRF refreshed, checking auth state...')
         const isAuthenticated = await checkAuth()
         if (isAuthenticated) {
           console.log('Auth state updated, redirecting to feed...')

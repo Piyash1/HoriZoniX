@@ -43,6 +43,12 @@ async function ensureCsrfToken() {
   return cachedCsrfToken;
 }
 
+// Explicitly refresh CSRF token (use after login)
+export async function refreshCsrfToken() {
+  cachedCsrfToken = null;
+  return ensureCsrfToken();
+}
+
 // Request interceptor to handle CSRF tokens and FormData
 api.interceptors.request.use(async (config) => {
   // Handle FormData - don't set Content-Type for FormData

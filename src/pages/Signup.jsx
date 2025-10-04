@@ -91,8 +91,9 @@ const Signup = () => {
         email,
         password,
       })
-      // Show info to check email instead of auto-login
-      alert('Account created. Please check your email to verify your address before signing in.')
+      // Show success message about email verification
+      setError('')
+      alert('Account created successfully! Please check your email to verify your address before signing in.')
       window.location.href = '/'
     } catch (err) {
       if (err?.response?.data?.password_errors) {
@@ -128,29 +129,56 @@ const Signup = () => {
         <span className='md:h-10'></span>
       </div>
       <div className='flex-1 flex items-center justify-center p-6 sm:p-10'>
-        <form onSubmit={onSubmit} className='bg-gradient-to-tr from-blue-50/90 via-white/80 to-blue-100/60 backdrop-blur p-6 md:p-8 rounded-xl shadow w-full max-w-sm space-y-4'>
+        <form onSubmit={onSubmit} name="signup" className='bg-gradient-to-tr from-blue-50/90 via-white/80 to-blue-100/60 backdrop-blur p-6 md:p-8 rounded-xl shadow w-full max-w-sm space-y-4'>
           <h2 className='text-2xl font-semibold text-indigo-900'>Sign up</h2>
           {error && <p className='text-red-600 text-sm'>{error}</p>}
 
           <div className='grid grid-cols-2 gap-3'>
             <div>
               <label className='block text-sm text-gray-700 mb-1'>First name</label>
-              <input value={firstName} onChange={(e)=>setFirstName(e.target.value)} type='text' className='w-full border rounded px-3 py-2' required />
+              <input 
+                value={firstName} 
+                onChange={(e)=>setFirstName(e.target.value)} 
+                type='text' 
+                className='w-full border rounded px-3 py-2' 
+                autoComplete='given-name'
+                required 
+              />
             </div>
             <div>
               <label className='block text-sm text-gray-700 mb-1'>Last name</label>
-              <input value={lastName} onChange={(e)=>setLastName(e.target.value)} type='text' className='w-full border rounded px-3 py-2' required />
+              <input 
+                value={lastName} 
+                onChange={(e)=>setLastName(e.target.value)} 
+                type='text' 
+                className='w-full border rounded px-3 py-2' 
+                autoComplete='family-name'
+                required 
+              />
             </div>
           </div>
 
           <div>
             <label className='block text-sm text-gray-700 mb-1'>Username (optional)</label>
-            <input value={username} onChange={(e)=>setUsername(e.target.value)} type='text' className='w-full border rounded px-3 py-2' />
+            <input 
+              value={username} 
+              onChange={(e)=>setUsername(e.target.value)} 
+              type='text' 
+              className='w-full border rounded px-3 py-2' 
+              autoComplete='username'
+            />
           </div>
 
           <div>
             <label className='block text-sm text-gray-700 mb-1'>Email</label>
-            <input value={email} onChange={(e)=>setEmail(e.target.value)} type='email' className='w-full border rounded px-3 py-2' required />
+            <input 
+              value={email} 
+              onChange={(e)=>setEmail(e.target.value)} 
+              type='email' 
+              className='w-full border rounded px-3 py-2' 
+              autoComplete='email'
+              required 
+            />
           </div>
           <div>
             <label className='block text-sm text-gray-700 mb-1'>Password</label>
@@ -159,6 +187,7 @@ const Signup = () => {
               onChange={handlePasswordChange} 
               type='password' 
               className={`w-full border rounded px-3 py-2 ${passwordErrors.length > 0 ? 'border-red-300 focus:border-red-500' : 'border-gray-300 focus:border-indigo-500'}`} 
+              autoComplete='new-password'
               required 
             />
             
@@ -210,7 +239,14 @@ const Signup = () => {
           </div>
           <div>
             <label className='block text-sm text-gray-700 mb-1'>Confirm password</label>
-            <input value={confirmPassword} onChange={(e)=>setConfirmPassword(e.target.value)} type='password' className='w-full border rounded px-3 py-2' required />
+            <input 
+              value={confirmPassword} 
+              onChange={(e)=>setConfirmPassword(e.target.value)} 
+              type='password' 
+              className='w-full border rounded px-3 py-2' 
+              autoComplete='new-password'
+              required 
+            />
           </div>
           <button 
             type='submit' 

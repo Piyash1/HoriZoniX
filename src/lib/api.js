@@ -153,6 +153,10 @@ export async function verifyEmail(token) {
   return api.post('/api/auth/verify-email/', { token });
 }
 
+export async function resendVerificationEmail(email) {
+  return api.post('/api/auth/resend-verification/', { email });
+}
+
 export async function getMe() {
   return api.get('/api/auth/me/');
 }

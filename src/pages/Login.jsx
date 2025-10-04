@@ -50,7 +50,13 @@ const Login = () => {
       }
     } catch (err) {
       console.error('Login error:', err)
-      setError(err?.message || 'Login failed')
+      const errorMessage = err?.response?.data?.error || err?.message || 'Login failed'
+      setError(errorMessage)
+      
+      // If it's an email verification error, show a link to resend verification
+      if (errorMessage.includes('verify your email')) {
+        setError(errorMessage + ' Click here to resend verification email.')
+      }
     } finally {
       setLoading(false)
     }
@@ -78,12 +84,19 @@ const Login = () => {
         <span className='md:h-10'></span>
       </div>
       <div className='flex-1 flex items-center justify-center p-6 sm:p-10'>
-        <form onSubmit={onSubmit} className='bg-gradient-to-tr from-blue-50/90 via-white/80 to-blue-100/60 backdrop-blur p-6 md:p-8 rounded-xl shadow w-full max-w-sm space-y-4'>
+        <form onSubmit={onSubmit} name="login" className='bg-gradient-to-tr from-blue-50/90 via-white/80 to-blue-100/60 backdrop-blur p-6 md:p-8 rounded-xl shadow w-full max-w-sm space-y-4'>
           <h2 className='text-2xl font-semibold text-indigo-900'>Sign in</h2>
           {error && <p className='text-red-600 text-sm'>{error}</p>}
           <div>
             <label className='block text-sm text-gray-700 mb-1'>Email</label>
-            <input value={email} onChange={(e)=>setEmail(e.target.value)} type='email' className='w-full border rounded px-3 py-2' required />
+            <input 
+              value={email} 
+              onChange={(e)=>setEmail(e.target.value)} 
+              type='email' 
+              className='w-full border rounded px-3 py-2' 
+              autoComplete='email'
+              required 
+            />
           </div>
           <div>
             <label className='block text-sm text-gray-700 mb-1'>Password</label>
@@ -92,6 +105,7 @@ const Login = () => {
               onChange={(e)=>setPassword(e.target.value)} 
               type='password' 
               className='w-full border rounded px-3 py-2' 
+              autoComplete='current-password'
               required 
               minLength="8"
             />

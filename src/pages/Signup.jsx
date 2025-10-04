@@ -91,9 +91,9 @@ const Signup = () => {
         email,
         password,
       })
-      // Show success message about email verification
+      // Show success message
       setError('')
-      alert('Account created successfully! Please check your email to verify your address before signing in.')
+      alert('Account created successfully! You can now sign in.')
       window.location.href = '/'
     } catch (err) {
       if (err?.response?.data?.password_errors) {
